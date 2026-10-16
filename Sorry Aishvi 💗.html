@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sorry Aishvi 💗</title>
+<style>
+:root{--bg:#fff0f5;--card:#fff;--tx:#4a1d33;--ac:#e0457b;--soft:#ffd6e5;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#2a1020;--card:#3b1a2e;--tx:#ffe3ee;--ac:#ff6fa0;--soft:#5a2a44}}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;overflow-x:hidden}
+#app{max-width:480px;margin:0 auto;padding:16px;text-align:center}
+h1{font-size:1.6rem;margin:8px 0}
+.bar{height:6px;background:var(--soft);border-radius:9px;overflow:hidden;margin:10px 0 16px}
+.bar i{display:block;height:100%;width:0;background:var(--ac);transition:width .4s}
+.card{background:var(--card);border-radius:20px;padding:18px;min-height:340px;position:relative;overflow:hidden;box-shadow:0 6px 24px rgba(224,69,123,.18);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.card p{margin:0;font-size:1.05rem;line-height:1.5}
+.hint{opacity:.7;font-size:.9rem!important}
+button{font:inherit;border:0;border-radius:99px;padding:12px 24px;background:var(--ac);color:#fff;font-weight:600;cursor:pointer}
+button.next{margin-top:14px;animation:pop .4s}
+button[hidden]{display:none}
+.big{font-size:5rem;cursor:pointer;transition:transform .1s}
+.big:active{transform:scale(.85)}
+.row{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+.fall{position:fixed;top:-40px;font-size:1.8rem;pointer-events:none;z-index:99;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(360deg)}}
+@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+.rope{position:relative;width:6px;height:140px;background:#a0703c;border-radius:3px;margin-top:-6px}
+.knob{position:absolute;left:50%;bottom:-18px;width:36px;height:36px;margin-left:-18px;border-radius:50%;background:var(--ac);touch-action:none;cursor:grab;box-shadow:0 3px 8px rgba(0,0,0,.3)}
+.star{font-size:2.6rem;cursor:pointer;filter:grayscale(1);transition:.3s}
+.star.on{filter:none;transform:scale(1.2)}
+.balloon{font-size:3.2rem;cursor:pointer}
+.msg{min-height:3em;font-weight:600;color:var(--ac)}
+canvas{border-radius:14px;touch-action:none;max-width:100%}
+.scratchwrap{position:relative;width:280px;height:120px}
+.scratchwrap>div{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:10px;background:var(--soft);border-radius:14px;font-weight:600}
+.scratchwrap canvas{position:absolute;inset:0}
+.flip{width:130px;height:110px;perspective:600px;cursor:pointer}
+.flip div{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .6s}
+.flip.on div{transform:rotateY(180deg)}
+.flip span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:8px;border-radius:14px;backface-visibility:hidden;font-size:.9rem;background:var(--soft)}
+.flip span+span{transform:rotateY(180deg);background:var(--ac);color:#fff}
+input[type=range]{width:90%;accent-color:var(--ac)}
+.prog{width:80%;height:14px;background:var(--soft);border-radius:9px;overflow:hidden}
+.prog i{display:block;height:100%;width:0;background:var(--ac)}
+.catch{position:absolute;font-size:2rem;cursor:pointer;animation:rise linear forwards}
+@keyframes rise{from{transform:translateY(0)}to{transform:translateY(-420px)}}
+.letter{background:var(--soft);padding:14px;border-radius:12px;text-align:left;line-height:1.6;animation:pop .5s}
+</style>
+</head>
+<body>
+<div id="app">
+  <h1>Sorry, Aishvi 💗</h1>
+  <div class="bar"><i id="pb"></i></div>
+  <div class="card" id="stage"></div>
+  <button class="next" id="nx" hidden>Aage chalo →</button>
+</div>
+<script>
+// ✏️ Yahan apna naam likh do
+var FROM = "Tumhara ___";
+var NAME = "Aishvi";
+var stage = document.getElementById('stage'), nx = document.getElementById('nx'), pb = document.getElementById('pb');
+var timers = [], cur = 0;
+function $(h){ stage.insertAdjacentHTML('beforeend', h); }
+function ready(){ nx.hidden = false; }
+function fall(list, n){
+  for(var i=0;i<n;i++){
+    var e = document.createElement('div');
+    e.className = 'fall'; e.textContent = list[i % list.length];
+    e.style.left = Math.random()*95 + 'vw';
+    e.style.animationDuration = (2.5 + Math.random()*2.5) + 's';
+    e.style.animationDelay = (Math.random()*1.2) + 's';
+    document.body.appendChild(e);
+    setTimeout(function(x){ x.remove(); }, 6500, e);
+  }
+}
+var acts = [
+// 1 rope
+function(){
+  $('<p>Neeche wali rope kheencho 🌸</p><div class="rope"><div class="knob" id="kn"></div></div><p class="hint">Neeche khinch ke chhodo</p>');
+  var k = document.getElementById('kn'), sy = 0, d = false, y = 0;
+  k.onpointerdown = function(e){ d = true; sy = e.clientY; k.setPointerCapture(e.pointerId); };
+  k.onpointermove = function(e){ if(!d) return; y = Math.max(0, Math.min(90, e.clientY - sy)); k.style.transform = 'translateY(' + y + 'px)'; };
+  k.onpointerup = function(){ d = false; if(y > 60){ fall(['🌸','🌹','🌷','🌼','💐'], 40); ready(); } y = 0; k.style.transform = ''; };
+},
+// 2 heart taps
+function(){
+  var n = 0;
+  $('<p>Is dil ko 10 baar tap karo 💖</p><div class="big" id="hh">💗</div><p id="ct">0 / 10</p>');
+  var h = document.getElementById('hh');
+  h.onclick = function(){ n++; document.getElementById('ct').textContent = n + ' / 10'; h.style.fontSize = (5 + n*.3) + 'rem'; fall(['💕'], 3); if(n == 10) ready(); };
+},
+// 3 candle
+function(){
+  $('<p>Candle bujhao aur ek wish maango 🎂</p><div class="big" id="cd">🕯️</div><p class="msg" id="mg"></p>');
+  document.getElementById('cd').onclick = function(){ this.textContent = '💨'; document.getElementById('mg').textContent = 'Meri wish: tum hamesha muskurati raho 😊'; ready(); };
+},
+// 4 stars
+function(){
+  var t = ['Tum meri sabse achhi dost ho ⭐','Tumhari smile meri favourite hai ⭐','Tumhe hurt karna meri galti thi ⭐','Tum bahut special ho ⭐','Main tumhe khone nahi dena chahta ⭐'], c = 0;
+  $('<p>Saare taare tap karo ✨</p><div class="row" id="sr"></div><p class="msg" id="mg"></p>');
+  t.forEach(function(s){
+    var e = document.createElement('div'); e.className = 'star'; e.textContent = '⭐';
+    e.onclick = function(){ if(e.classList.contains('on')) return; e.classList.add('on'); document.getElementById('mg').textContent = s; if(++c == t.length) ready(); };
+    document.getElementById('sr').appendChild(e);
+  });
+},
+// 5 balloons
+function(){
+  var t = ['Sorry 🥺','Maaf kar do 🙏','Galti meri thi','Tum important ho','Please maan jao 💗'], c = 0;
+  $('<p>Gubbare phodo 🎈</p><div class="row" id="br"></div><p class="msg" id="mg"></p>');
+  t.forEach(function(s){
+    var e = document.createElement('div'); e.className = 'balloon'; e.textContent = '🎈';
+    e.onclick = function(){ if(e.textContent == '💥') return; e.textContent = '💥'; document.getElementById('mg').textContent = s; if(++c == t.length) ready(); };
+    document.getElementById('br').appendChild(e);
+  });
+},
+// 6 scratch
+function(){
+  $('<p>Scratch karo, kuch likha hai 👆</p><div class="scratchwrap"><div>Tum meri duniya ho, ' + NAME + ' 💗</div><canvas id="cv" width="280" height="120"></canvas></div>');
+  var cv = document.getElementById('cv'), x = cv.getContext('2d'), dn = false, ok = false;
+  x.fillStyle = '#c9a0b4'; x.fillRect(0,0,280,120); x.fillStyle = '#fff'; x.font = '16px sans-serif'; x.fillText('Yahan scratch karo ✨', 70, 65);
+  function sc(e){ var r = cv.getBoundingClientRect(); x.globalCompositeOperation = 'destination-out'; x.beginPath(); x.arc((e.clientX - r.left)*280/r.width, (e.clientY - r.top)*120/r.height, 16, 0, 7); x.fill(); }
+  cv.onpointerdown = function(e){ dn = true; cv.setPointerCapture(e.pointerId); sc(e); };
+  cv.onpointermove = function(e){ if(dn) sc(e); };
+  cv.onpointerup = function(){
+    dn = false; if(ok) return;
+    var d = x.getImageData(0,0,280,120).data, c = 0;
+    for(var i=3;i<d.length;i+=16) if(d[i] == 0) c++;
+    if(c > d.length/16*0.4){ ok = true; cv.style.display = 'none'; ready(); }
+  };
+},
+// 7 gift
+function(){
+  $('<p>Gift kholo 🎁</p><div class="big" id="gf">🎁</div><p class="msg" id="mg"></p>');
+  document.getElementById('gf').onclick = function(){ this.textContent = '🤗'; document.getElementById('mg').textContent = 'Andar ek bada sa hug hai, tumhare liye!'; fall(['🎉','✨','💖'], 25); ready(); };
+},
+// 8 gussa meter
+function(){
+  $('<p>Gussa meter ko 0 tak le aao 😤→😊</p><div class="big" id="em">😡</div><input type="range" id="rg" min="0" max="100" value="100"><p class="msg" id="mg">Gussa: 100%</p>');
+  var r = document.getElementById('rg');
+  r.oninput = function(){
+    var v = +r.value; document.getElementById('mg').textContent = 'Gussa: ' + v + '%';
+    document.getElementById('em').textContent = v > 70 ? '😡' : v > 40 ? '😠' : v > 10 ? '🙂' : '😊';
+    if(v == 0){ r.disabled = true; fall(['😊','💗'], 15); ready(); }
+  };
+},
+// 9 catch hearts
+function(){
+  var n = 0;
+  $('<p>Hearts pakdo (8) 💘</p><p class="msg" id="ct">0 / 8</p>');
+  var iv = setInterval(function(){
+    if(n >= 8) return;
+    var e = document.createElement('div'); e.className = 'catch'; e.textContent = '💗';
+    e.style.left = (10 + Math.random()*75) + '%'; e.style.bottom = '-40px'; e.style.animationDuration = '4s';
+    e.onclick = function(){ e.remove(); n++; document.getElementById('ct').textContent = n + ' / 8'; if(n == 8) ready(); };
+    stage.appendChild(e); setTimeout(function(){ e.remove(); }, 4100);
+  }, 700);
+  timers.push(iv);
+},
+// 10 flip cards
+function(){
+  var t = [['Meri galti','Maine tumhe hurt kiya 😔'],['Mera pachtawa','Mujhe bahut bura lag raha hai'],['Meri request','Ek aur mauka do 🥹']], c = 0;
+  $('<p>Cards palto 🃏</p><div class="row" id="fr"></div>');
+  t.forEach(function(s){
+    var e = document.createElement('div'); e.className = 'flip'; e.innerHTML = '<div><span>' + s[0] + '</span><span>' + s[1] + '</span></div>';
+    e.onclick = function(){ if(e.classList.contains('on')) return; e.classList.add('on'); if(++c == t.length) ready(); };
+    document.getElementById('fr').appendChild(e);
+  });
+},
+// 11 hug hold
+function(){
+  $('<p>Button daba ke rakho, virtual hug 🤗</p><div class="prog"><i id="pg"></i></div><button id="hb">Hold karo</button>');
+  var b = document.getElementById('hb'), v = 0, iv = null, done = false;
+  function go(){ if(iv || done) return; iv = setInterval(function(){ v += 2; document.getElementById('pg').style.width = v + '%'; if(v >= 100){ done = true; clearInterval(iv); b.textContent = 'Hug mil gaya 🤗💗'; fall(['🤗','💗'], 20); ready(); } }, 50); }
+  function st(){ clearInterval(iv); iv = null; }
+  b.onpointerdown = go; b.onpointerup = st; b.onpointerleave = st;
+  timers.push({ c: st });
+},
+// 12 letter
+function(){
+  $('<p>Envelope kholo ✉️</p><div class="big" id="ev">💌</div><div id="lt"></div>');
+  document.getElementById('ev').onclick = function(){
+    this.style.display = 'none';
+    document.getElementById('lt').innerHTML = '<div class="letter">Dear ' + NAME + ',<br>Mujhe pata hai maine tumhe hurt kiya. Tumhari aankhon ke aansu mere liye sabse bada sabak hain. Main sach mein sharminda hu. Tum mere liye bahut matlab rakhti ho. 💗<br><br>' + FROM + '</div>';
+    ready();
+  };
+},
+// 13 promise
+function(){
+  $('<p style="font-size:1.3rem;font-weight:700">Meri Promise 💍</p><p>' + NAME + ', main promise karta hu ki main tumhe dobara hurt nahi karunga. Tumhari izzat, tumhari feelings aur tumhari khushi mere liye hamesha pehle hongi.</p><button id="pr">Haan, promise karta hu 🤞</button><p class="msg" id="mg"></p>');
+  document.getElementById('pr').onclick = function(){
+    this.style.display = 'none';
+    document.getElementById('mg').innerHTML = 'Promise kar diya 💗<br>Please mujhe maaf kar do, ' + NAME + '.<br>' + FROM;
+    fall(['🌸','🌹','💖','✨','🎉'], 60);
+  };
+}
+];
+function show(i){
+  timers.forEach(function(t){ if(t.c) t.c(); else clearInterval(t); }); timers = [];
+  stage.innerHTML = ''; nx.hidden = true;
+  pb.style.width = ((i + 1)/acts.length*100) + '%';
+  acts[i]();
+}
+nx.onclick = function(){ if(cur < acts.length - 1){ cur++; show(cur); } };
+show(0);
+</script>
+</body>
+</html>
